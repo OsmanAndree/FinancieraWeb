@@ -1,74 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, ArrowDownLeft, ShoppingBag, Coffee, Plane, Briefcase } from 'lucide-react';
+import { useAppData } from '../contexts/AppDataContext';
 
-const transactions = [
-  {
-    id: 1,
-    type: 'sent',
-    amount: -2500,
-    currency: 'USD',
-    recipient: 'Sarah Johnson',
-    location: 'New York, US',
-    flag: '🇺🇸',
-    category: 'Business',
-    icon: Briefcase,
-    time: '2 hours ago',
-    description: 'Consulting payment'
-  },
-  {
-    id: 2,
-    type: 'received',
-    amount: +1840,
-    currency: 'EUR',
-    recipient: 'Freelance Client',
-    location: 'Berlin, DE',
-    flag: '🇩🇪',
-    category: 'Income',
-    icon: ArrowDownLeft,
-    time: '5 hours ago',
-    description: 'Web development project'
-  },
-  {
-    id: 3,
-    type: 'sent',
-    amount: -89.99,
-    currency: 'GBP',
-    recipient: 'British Airways',
-    location: 'London, UK',
-    flag: '🇬🇧',
-    category: 'Travel',
-    icon: Plane,
-    time: '1 day ago',
-    description: 'Flight booking'
-  },
-  {
-    id: 4,
-    type: 'sent',
-    amount: -45.20,
-    currency: 'USD',
-    recipient: 'Amazon',
-    location: 'Seattle, US',
-    flag: '🇺🇸',
-    category: 'Shopping',
-    icon: ShoppingBag,
-    time: '2 days ago',
-    description: 'Office supplies'
-  },
-  {
-    id: 5,
-    type: 'sent',
-    amount: -12.50,
-    currency: 'USD',
-    recipient: 'Starbucks Coffee',
-    location: 'San Francisco, US',
-    flag: '🇺🇸',
-    category: 'Food',
-    icon: Coffee,
-    time: '3 days ago',
-    description: 'Coffee & pastries'
-  },
-];
+// Mapeo de iconos
+const iconMap = {
+  Briefcase,
+  ArrowDownLeft,
+  Plane,
+  ShoppingBag,
+  Coffee,
+};
 
 const categoryColors = {
   Business: 'bg-blue-500/20 text-blue-400',
@@ -78,7 +20,12 @@ const categoryColors = {
   Food: 'bg-pink-500/20 text-pink-400',
 };
 
-export const TransactionTimeline: React.FC = () => {
+export const TransactionTimeline: React.FC = React.memo(() => {
+  const { transactions } = useAppData();
+  
+  const recentTransactions = useMemo(() => {
+    return transactions.slice(0, 10); // Mostrar solo las 10 más recientes
+  }, [transactions]);
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -94,7 +41,7 @@ export const TransactionTimeline: React.FC = () => {
       {/* Transaction List */}
       <div className="bg-light-surface/50 dark:bg-dark-surface/50 backdrop-blur-sm border border-light-border dark:border-dark-border rounded-2xl p-6 shadow-glass transition-colors duration-300">
         <div className="space-y-4">
-          {transactions.map((transaction, index) => (
+          {recentTransactions.map((transaction, index) => (
             <motion.div
               key={transaction.id}
               initial={{ opacity: 0, x: -30 }}
@@ -108,7 +55,9 @@ export const TransactionTimeline: React.FC = () => {
                 {transaction.type === 'sent' ? (
                   <ArrowUpRight className={`w-5 h-5 ${transaction.type === 'sent' ? 'text-red-400' : 'text-lime-accent'}`} />
                 ) : (
-                  <transaction.icon className="w-5 h-5 text-lime-accent" />
+                  React.createElement(iconMap[transaction.icon as keyof typeof iconMap] || ArrowDownLeft, { 
+                    className: "w-5 h-5 text-lime-accent" 
+                  })
                 )}
               </div>
 
@@ -164,4 +113,4 @@ export const TransactionTimeline: React.FC = () => {
       </div>
     </div>
   );
-};
+});

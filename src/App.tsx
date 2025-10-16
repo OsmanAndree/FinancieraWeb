@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { AppDataProvider } from './contexts/AppDataContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ToastProvider } from './components/ToastProvider';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import { WalletOverview } from './components/WalletOverview';
 import { TransactionTimeline } from './components/TransactionTimeline';
 import { ExchangeRates } from './components/ExchangeRates';
+import { TransferForm } from './components/TransferForm';
 import { CTAStrip } from './components/CTAStrip';
 
 function App() {
   const [activeSection, setActiveSection] = useState('wallet');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderMainContent = () => {
     switch (activeSection) {
@@ -23,18 +29,7 @@ function App() {
       case 'exchange':
         return <ExchangeRates />;
       case 'transfers':
-        return (
-          <div className="flex items-center justify-center h-96">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center"
-            >
-              <h2 className="text-2xl font-bold text-light-text dark:text-dark-text font-editorial mb-4">International Transfers</h2>
-              <p className="text-light-text-secondary dark:text-dark-text-secondary">Coming soon - Send money globally with animated journey tracking</p>
-            </motion.div>
-          </div>
-        );
+        return <TransferForm />;
       case 'insights':
         return (
           <div className="flex items-center justify-center h-96">
@@ -67,9 +62,22 @@ function App() {
   };
 
   return (
-    <ThemeProvider>
-      <AppContent activeSection={activeSection} setActiveSection={setActiveSection} renderMainContent={renderMainContent} />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AppDataProvider>
+            <ToastProvider />
+            <AppContent 
+              activeSection={activeSection} 
+              setActiveSection={setActiveSection} 
+              renderMainContent={renderMainContent}
+              isMobileMenuOpen={isMobileMenuOpen}
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
+          </AppDataProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -77,7 +85,9 @@ const AppContent: React.FC<{
   activeSection: string;
   setActiveSection: (section: string) => void;
   renderMainContent: () => React.ReactNode;
-}> = ({ activeSection, setActiveSection, renderMainContent }) => {
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
+}> = ({ activeSection, setActiveSection, renderMainContent, isMobileMenuOpen, setIsMobileMenuOpen }) => {
   return (
     <div className="min-h-screen bg-light-base dark:bg-dark-base text-light-text dark:text-dark-text font-editorial transition-colors duration-300">
       {/* Background Effects */}
@@ -88,15 +98,20 @@ const AppContent: React.FC<{
 
       <div className="flex h-screen relative">
         {/* Sidebar */}
-        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        <Sidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          isMobileOpen={isMobileMenuOpen}
+          onMobileClose={() => setIsMobileMenuOpen(false)}
+        />
         
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
-          <TopBar />
+          <TopBar onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
           
           {/* Content Area */}
           <div className="flex-1 overflow-auto pb-20">
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSection}

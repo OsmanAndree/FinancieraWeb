@@ -1,0 +1,40 @@
+{
+  "name": "FinanceHub - Global Banking",
+  "short_name": "FinanceHub",
+  "description": "Aplicación financiera moderna con gestión de cartera, tipos de cambio y transferencias internacionales",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D1412",
+  "theme_color": "#65A30D",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "business", "productivity"],
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

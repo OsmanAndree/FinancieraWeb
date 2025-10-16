@@ -1,57 +1,29 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
+import { useAppData } from '../contexts/AppDataContext';
+import { useToast } from './ToastProvider';
 
-// Displays live currency exchange rates with bank comparisons and a quick exchange calculator
-const exchangeRates = [
-  { 
-    pair: 'EUR/USD', 
-    rate: 1.0892, 
-    change: +0.0023, 
-    changePercent: +0.21,
-    high: 1.0895,
-    low: 1.0871,
-    bankRate: 1.0850,
-    spread: 0.0042
-  },
-  { 
-    pair: 'GBP/USD', 
-    rate: 1.2634, 
-    change: -0.0018, 
-    changePercent: -0.14,
-    high: 1.2651,
-    low: 1.2618,
-    bankRate: 1.2590,
-    spread: 0.0044
-  },
-  { 
-    pair: 'USD/JPY', 
-    rate: 149.82, 
-    change: +0.45, 
-    changePercent: +0.30,
-    high: 149.95,
-    low: 149.21,
-    bankRate: 149.20,
-    spread: 0.62
-  },
-  { 
-    pair: 'EUR/GBP', 
-    rate: 0.8621, 
-    change: +0.0008, 
-    changePercent: +0.09,
-    high: 0.8628,
-    low: 0.8615,
-    bankRate: 0.8605,
-    spread: 0.0016
-  },
-];
-
-export const ExchangeRates: React.FC = () => {
+export const ExchangeRates: React.FC = React.memo(() => {
+  const { exchangeRates, setExchangeRates } = useAppData();
+  const { showSuccess } = useToast();
   const [lastUpdate, setLastUpdate] = React.useState(new Date());
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
+    // Simular actualización de datos
+    setExchangeRates(prev => prev.map(rate => ({
+      ...rate,
+      rate: rate.rate + (Math.random() - 0.5) * 0.01,
+      change: (Math.random() - 0.5) * 0.01,
+      changePercent: (Math.random() - 0.5) * 0.5,
+    })));
     setLastUpdate(new Date());
-  };
+    showSuccess('Tipos de cambio actualizados');
+  }, [setExchangeRates, showSuccess]);
+
+  const formattedLastUpdate = useMemo(() => {
+    return lastUpdate.toLocaleTimeString();
+  }, [lastUpdate]);
 
   return (
     <div className="space-y-6">
@@ -91,7 +63,7 @@ export const ExchangeRates: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-xl font-bold text-light-text dark:text-dark-text font-editorial">{rate.pair}</h3>
-                <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">Last update: {lastUpdate.toLocaleTimeString()}</p>
+                <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">Last update: {formattedLastUpdate}</p>
               </div>
               <div className={`flex items-center space-x-1 ${rate.change >= 0 ? 'text-lime-accent' : 'text-red-400'}`}>
                 {rate.change >= 0 ? (
@@ -212,4 +184,4 @@ export const ExchangeRates: React.FC = () => {
       </motion.div>
     </div>
   );
-};
+});

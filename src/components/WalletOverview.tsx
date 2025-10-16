@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Eye, EyeOff } from 'lucide-react';
+import { useAppData } from '../contexts/AppDataContext';
+import { useToast } from './ToastProvider';
 
-const currencies = [
-  { code: 'USD', symbol: '$', balance: 12847.32, change: +2.34, flag: '🇺🇸' },
-  { code: 'EUR', symbol: '€', balance: 8923.41, change: -1.12, flag: '🇪🇺' },
-  { code: 'GBP', symbol: '£', balance: 6432.18, change: +0.89, flag: '🇬🇧' },
-  { code: 'JPY', symbol: '¥', balance: 1234567, change: -0.45, flag: '🇯🇵' },
-];
+export const WalletOverview: React.FC = React.memo(() => {
+  const { currencies, preferences, setPreferences, getTotalPortfolioValue } = useAppData();
+  const { showSuccess } = useToast();
+  
+  const showBalances = preferences.showBalances;
+  
+  const toggleBalances = useMemo(() => () => {
+    setPreferences(prev => ({ ...prev, showBalances: !prev.showBalances }));
+    showSuccess(showBalances ? 'Balances ocultados' : 'Balances mostrados');
+  }, [setPreferences, showSuccess, showBalances]);
 
-export const WalletOverview: React.FC = () => {
-  const [showBalances, setShowBalances] = React.useState(true);
+  const totalPortfolioValue = useMemo(() => {
+    return getTotalPortfolioValue();
+  }, [getTotalPortfolioValue]);
 
   return (
     <div className="space-y-6">
@@ -28,8 +35,9 @@ export const WalletOverview: React.FC = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setShowBalances(!showBalances)}
+          onClick={toggleBalances}
           className="p-3 bg-light-glass dark:bg-dark-glass rounded-full hover:bg-lime-accent/10 transition-colors duration-300"
+          aria-label={showBalances ? "Ocultar balances" : "Mostrar balances"}
         >
           {showBalances ? (
             <Eye className="w-5 h-5 text-light-text dark:text-dark-text" />
@@ -56,7 +64,7 @@ export const WalletOverview: React.FC = () => {
             className="flex items-baseline space-x-2 mt-2"
           >
             <span className="text-4xl font-bold text-lime-accent font-editorial">
-              {showBalances ? '$28,203.91' : '••••••••'}
+              {showBalances ? `$${totalPortfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '••••••••'}
             </span>
             <span className="text-lg text-light-text-secondary dark:text-dark-text-secondary">USD</span>
           </motion.div>
@@ -68,7 +76,7 @@ export const WalletOverview: React.FC = () => {
       </motion.div>
 
       {/* Currency Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {currencies.map((currency, index) => (
           <motion.div
             key={currency.code}
@@ -120,4 +128,4 @@ export const WalletOverview: React.FC = () => {
       </div>
     </div>
   );
-};
+});
